@@ -6,6 +6,13 @@
 
 /* =========================
    DISCLOSURE ACTIVITY AUDIT
+   This table records all actions performed on disclosures
+   by a client over time.
+
+   Used for:
+   - Viewing disclosure activity logs
+   - Filtering audit history
+   - Exporting audit reports
    ========================= */
 
 CREATE TABLE audit_disclosure_activity (
@@ -24,6 +31,13 @@ CREATE TABLE audit_disclosure_activity (
 
 /* =========================
    RECIPIENT ACCESS AUDIT
+   This table records each attempt by a recipient to
+   access a shared disclosure and the result of that attempt.
+
+   Used for:
+   - Viewing recipient access logs
+   - Filtering audit history
+   - Exporting audit reports
    ========================= */
 
 CREATE TABLE audit_recipient_access (
@@ -31,7 +45,7 @@ CREATE TABLE audit_recipient_access (
     disclosure_id INT NOT NULL,
     client_id INT NOT NULL,
     recipient_id INT NOT NULL,
-    access_status ENUM('SUCCESS','FAILED','EXPIRED','REVOKE') NOT NULL,
+    access_status ENUM('SUCCESS','FAILED','EXPIRED','REVOKED') NOT NULL,
     accessed_at DATETIME NOT NULL,
     ip_address VARCHAR(45),
     user_agent VARCHAR(255),
@@ -43,6 +57,8 @@ CREATE TABLE audit_recipient_access (
 
 /* =========================
    SAMPLE DATA
+   Inserts realistic audit records so the system can
+   demonstrate viewing, filtering, and exporting logs.
    ========================= */
 
 INSERT INTO audit_disclosure_activity
@@ -58,7 +74,6 @@ INSERT INTO audit_disclosure_activity
 (5, 3, 'CREATE', 3, '2026-01-25 08:55:00', 'Created disclosure'),
 (5, 3, 'SHARE', 3, '2026-01-25 09:05:00', 'Shared with recipient');
 
-
 INSERT INTO audit_recipient_access
 (disclosure_id, client_id, recipient_id, access_status, accessed_at, ip_address, user_agent) VALUES
 (1, 1, 4, 'SUCCESS', '2026-01-10 10:01:12', '73.22.10.5', 'Mozilla/5.0'),
@@ -68,22 +83,24 @@ INSERT INTO audit_recipient_access
 (3, 2, 6, 'SUCCESS', '2026-01-18 12:10:33', '64.31.7.88', 'Mozilla/5.0'),
 (4, 2, 7, 'SUCCESS', '2026-01-22 17:05:00', '64.31.7.88', 'Mozilla/5.0'),
 (5, 3, 8, 'SUCCESS', '2026-01-25 09:30:11', '101.14.2.9', 'Mozilla/5.0'),
-(6, 3, 9, 'REVOKE', '2026-02-02 10:05:09', '101.14.2.9', 'Mozilla/5.0'),
+(6, 3, 9, 'REVOKED', '2026-02-02 10:05:09', '101.14.2.9', 'Mozilla/5.0'),
 (7, 1, 10, 'EXPIRED', '2026-02-05 08:40:40', '22.18.44.12', 'Mozilla/5.0'),
 (8, 2, 4, 'SUCCESS', '2026-02-06 14:21:55', '73.22.10.5', 'Mozilla/5.0');
 
 
 /* =========================
    AUDIT LOG QUERIES
+   These queries retrieve audit data for display,
+   filtering, and export in the application UI.
    ========================= */
 
 SELECT activity_id, disclosure_id, action, performed_at, details
 FROM audit_disclosure_activity
-WHERE client_id = 1
+WHERE client_id = :client_id
 ORDER BY performed_at DESC;
 
 SELECT r.access_log_id, r.disclosure_id, u.email, r.access_status, r.accessed_at
 FROM audit_recipient_access r
 JOIN users u ON u.user_id = r.recipient_id
-WHERE r.client_id = 1
+WHERE r.client_id = :client_id
 ORDER BY r.accessed_at DESC;
