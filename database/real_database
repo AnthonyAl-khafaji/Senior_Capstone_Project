@@ -1,0 +1,140 @@
+-- =========================================
+-- Create Database
+-- =========================================
+CREATE DATABASE CourseEnrollDB;
+USE CourseEnrollDB;
+
+-- =========================================
+-- Table 1: Students
+-- =========================================
+CREATE TABLE Students (
+    student_id VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    major VARCHAR(50)
+);
+
+INSERT INTO Students (student_id, name, email, major) VALUES
+('S001', 'Alice Johnson', 'alice.johnson@example.edu', 'Computer Science'),
+('S002', 'Bob Smith', 'bob.smith@example.edu', 'Mathematics'),
+('S003', 'Charlie Brown', 'charlie.brown@example.edu', 'Physics'),
+('S004', 'Diana Prince', 'diana.prince@example.edu', 'Economics'),
+('S005', 'Ethan Hunt', 'ethan.hunt@example.edu', 'Arts'),
+('S006', 'Fiona Gallagher', 'fiona.g@example.edu', 'Computer Science'),
+('S007', 'George Miller', 'george.miller@example.edu', 'Mathematics'),
+('S008', 'Hannah Lee', 'hannah.lee@example.edu', 'Computer Science'),
+('S009', 'Ian Wright', 'ian.wright@example.edu', 'Physics'),
+('S010', 'Jane Doe', 'jane.doe@example.edu', 'Economics');
+
+-- =========================================
+-- Table 2: Courses
+-- =========================================
+CREATE TABLE Courses (
+    course_id VARCHAR(10) PRIMARY KEY,
+    course_name VARCHAR(50) NOT NULL,
+    credit_hours INT NOT NULL,
+    department VARCHAR(50)
+);
+
+INSERT INTO Courses (course_id, course_name, credit_hours, department) VALUES
+('C101', 'Introduction to CS', 3, 'Computer Science'),
+('C102', 'Data Structures', 4, 'Computer Science'),
+('C103', 'Database Systems', 3, 'Computer Science'),
+('C104', 'Calculus I', 4, 'Mathematics'),
+('C105', 'Physics I', 4, 'Physics'),
+('C106', 'English Literature', 3, 'Arts'),
+('C107', 'Microeconomics', 3, 'Economics'),
+('C108', 'Software Engineering', 3, 'Computer Science'),
+('C109', 'Linear Algebra', 3, 'Mathematics'),
+('C110', 'Operating Systems', 4, 'Computer Science');
+
+-- =========================================
+-- Table 3: Enrollment
+-- =========================================
+CREATE TABLE Enrollment (
+    enrollment_id VARCHAR(10) PRIMARY KEY,
+    student_id VARCHAR(10),
+    course_id VARCHAR(10),
+    enrollment_status VARCHAR(20),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id),
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+
+INSERT INTO Enrollment (enrollment_id, student_id, course_id, enrollment_status) VALUES
+('E101', 'S001', 'C101', 'Active'),
+('E102', 'S001', 'C104', 'Active'),
+('E103', 'S002', 'C102', 'Active'),
+('E104', 'S003', 'C103', 'Active'),
+('E105', 'S004', 'C105', 'Dropped'),
+('E106', 'S005', 'C106', 'Active'),
+('E107', 'S002', 'C104', 'Active'),
+('E108', 'S003', 'C101', 'Active'),
+('E109', 'S004', 'C102', 'Active'),
+('E110', 'S005', 'C107', 'Active');
+
+-- =========================================
+-- Table 4: Grades
+-- =========================================
+CREATE TABLE Grades (
+    grade_id VARCHAR(10) PRIMARY KEY,
+    enrollment_id VARCHAR(10),
+    grade_value VARCHAR(2),
+    FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
+);
+
+INSERT INTO Grades (grade_id, enrollment_id, grade_value) VALUES
+('G101', 'E101', 'A'),
+('G102', 'E102', 'B+'),
+('G103', 'E103', 'B'),
+('G104', 'E104', 'A-'),
+('G105', 'E105', 'C'),
+('G106', 'E106', 'B+'),
+('G107', 'E107', 'A'),
+('G108', 'E108', 'B'),
+('G109', 'E109', 'B-'),
+('G110', 'E110', 'A');
+
+-- =========================================
+-- Table 5: Schedule
+-- =========================================
+CREATE TABLE Schedule (
+    schedule_id VARCHAR(10) PRIMARY KEY,
+    course_id VARCHAR(10),
+    class_time VARCHAR(50),
+    classroom VARCHAR(10),
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+
+INSERT INTO Schedule (schedule_id, course_id, class_time, classroom) VALUES
+('S101', 'C101', 'Mon 9:00-11:00', 'R101'),
+('S102', 'C102', 'Tue 10:00-12:00', 'R102'),
+('S103', 'C103', 'Wed 13:00-15:00', 'R103'),
+('S104', 'C104', 'Thu 9:00-11:00', 'R104'),
+('S105', 'C105', 'Fri 10:00-12:00', 'R105'),
+('S106', 'C106', 'Mon 14:00-16:00', 'R106'),
+('S107', 'C107', 'Tue 15:00-17:00', 'R107'),
+('S108', 'C108', 'Wed 9:00-11:00', 'R108'),
+('S109', 'C109', 'Thu 13:00-15:00', 'R109'),
+('S110', 'C110', 'Fri 14:00-16:00', 'R110');
+
+-- =========================================
+-- Table 6: InstructorAssignment
+-- =========================================
+CREATE TABLE InstructorAssignment (
+    assignment_id VARCHAR(10) PRIMARY KEY,
+    instructor_id VARCHAR(10),
+    course_id VARCHAR(10),
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+
+INSERT INTO InstructorAssignment (assignment_id, instructor_id, course_id) VALUES
+('A101', 'I001', 'C101'),
+('A102', 'I002', 'C102'),
+('A103', 'I003', 'C103'),
+('A104', 'I004', 'C104'),
+('A105', 'I005', 'C105'),
+('A106', 'I001', 'C106'),
+('A107', 'I002', 'C107'),
+('A108', 'I003', 'C108'),
+('A109', 'I004', 'C109'),
+('A110', 'I005', 'C110');
