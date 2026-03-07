@@ -1,0 +1,188 @@
+import pathlib
+import sys
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import SQLModel, Session, create_engine
+
+# Ensure project root is importable when running pytest
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+import app.main as main
+
+
+@pytest.fixture()
+def test_engine(tmp_path):
+    db_file = tmp_path / "test.db"
+    engine = create_engine(f"sqlite:///{db_file}", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    return engine
+
+
+@pytest.fixture()
+def client(test_engine):
+    def get_session_override():
+        with Session(test_engine) as session:
+            yield session
+
+    main.app.dependency_overrides[main.get_session] = get_session_override
+    c = TestClient(main.app)
+    yield c
+    main.app.dependency_overrides.pop(main.get_session, None)
+
+
+def signup_and_login(client, *, role, first, last, email, password="pw123"):
+    r = client.post(
+        "/auth/signup",
+        json={
+            "first_name": first,
+            "last_name": last,
+            "email": email,
+            "password": password,
+            "role": role,
+        },
+    )
+    assert r.status_code == 200
+
+    r2 = client.post("/auth/login", json={"email": email, "password": password})
+    assert r2.status_code == 200
+    return r2.json()
+
+
+def test_signup_login_and_me(client):
+    user = signup_and_login(
+        client,
+        role="student",
+        first="Alice",
+        last="Stone",
+        email="alice@example.com",
+    )
+
+    me = client.get("/me", headers={"x-user-id": str(user["user_id"])})
+    assert me.status_code == 200
+    me_data = me.json()
+    assert me_data["role"] == "student"
+    assert me_data["email"] == "alice@example.com"
+
+
+def test_admin_course_management_and_student_enrollment_flow(client):
+    admin = signup_and_login(
+        client,
+        role="admin",
+        first="Admin",
+        last="User",
+        email="admin@example.com",
+    )
+    student = signup_and_login(
+        client,
+        role="student",
+        first="Bob",
+        last="Lee",
+        email="bob@example.com",
+    )
+
+    create = client.post(
+        "/courses",
+        headers={"x-user-id": str(admin["user_id"])},
+        json={
+            "course_name": "Intro to CS",
+            "department": "CS",
+            "credits": 3,
+            "capacity": 1,
+        },
+    )
+    assert create.status_code == 200
+    cid = create.json()["course_id"]
+
+    enroll = client.post(
+        f"/enrollments?course_id={cid}",
+        headers={"x-user-id": str(student["user_id"])},
+    )
+    assert enroll.status_code == 200
+    assert enroll.json()["status"] == "enrolled"
+
+    student_courses = client.get(
+        "/student/courses",
+        headers={"x-user-id": str(student["user_id"])},
+    )
+    assert student_courses.status_code == 200
+    assert len(student_courses.json()) == 1
+
+    drop = client.delete(
+        f"/enrollments?course_id={cid}",
+        headers={"x-user-id": str(student["user_id"])},
+    )
+    assert drop.status_code == 200
+    assert drop.json()["status"] == "dropped"
+
+
+def test_capacity_limit(client):
+    admin = signup_and_login(
+        client,
+        role="admin",
+        first="Admin",
+        last="User",
+        email="capadmin@example.com",
+    )
+    student1 = signup_and_login(
+        client,
+        role="student",
+        first="S1",
+        last="A",
+        email="s1@example.com",
+    )
+    student2 = signup_and_login(
+        client,
+        role="student",
+        first="S2",
+        last="B",
+        email="s2@example.com",
+    )
+
+    create = client.post(
+        "/courses",
+        headers={"x-user-id": str(admin["user_id"])},
+        json={
+            "course_name": "Data Structures",
+            "department": "CS",
+            "credits": 4,
+            "capacity": 1,
+        },
+    )
+    cid = create.json()["course_id"]
+
+    e1 = client.post(
+        f"/enrollments?course_id={cid}",
+        headers={"x-user-id": str(student1["user_id"])},
+    )
+    assert e1.status_code == 200
+
+    e2 = client.post(
+        f"/enrollments?course_id={cid}",
+        headers={"x-user-id": str(student2["user_id"])},
+    )
+    assert e2.status_code == 400
+
+
+def test_role_restriction_for_course_creation(client):
+    student = signup_and_login(
+        client,
+        role="student",
+        first="No",
+        last="Admin",
+        email="student.only@example.com",
+    )
+
+    create = client.post(
+        "/courses",
+        headers={"x-user-id": str(student["user_id"])},
+        json={
+            "course_name": "Illegal Course",
+            "department": "X",
+            "credits": 1,
+            "capacity": 10,
+        },
+    )
+    assert create.status_code == 403
