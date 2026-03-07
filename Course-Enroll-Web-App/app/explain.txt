@@ -1,0 +1,85 @@
+For this project, I want there to be a sign in/login page as the first page 
+that’s opened. There, there will be selections for either student, instructor, 
+or admin. Each will select the given role. Each role interacts with the database 
+through different workflows and permissions. To sign up, they will select one of 
+the three roles and write in a first name, last name, email address, and password in 
+different fields. To login, they will type in their email and password. 
+The system validates the credentials against the Users table in the database. After 
+successful authentication, they will be directed to the dashboard associated with 
+their role (student, instructor, or admin). On the student dashboard, they will 
+have a drop down of 1) Course Catalog, where they can see all available courses 
+with the course name, department, credit hours, capacity, instructor, and 
+schedule and will be able to enroll if it’s not at full capacity, 2) My Courses, 
+where they can see all courses they are currently enrolled in and they can drop 
+whatever course they wish 3) Grades where they can see all their grades for each 
+course the instructor has graded of theirs and 4) Schedule where they can see their 
+weekly schedule of classes including days, times, and classroom locations. The 
+instructor dashboard will have a drop down of 1) My Courses where they can see the 
+list of courses that was assigned to them 2) Course Roster where they can see all 
+students enrolled in each course of theirs, with the student name, email and 
+grade status and 3) Grade management where they can create new grade record, 
+update grades, or delete grades of students in whatever class the student is 
+enrolled in of their. The admin dashboard will have a drop down of 1) Course 
+management where they can add, edit, and delete course in the course catalog 
+2) Instructor Management where they can create, update, or remove instructor records 
+3) Instructor Assignment where they can assign instructors to courses and 
+4) Schedule Management where they can specify classroom location, meeting times, 
+and course schedules. Each dashboard will have a button on the opposite side of the 
+logo that will log them out and return them to the login screen. 
+The database tables are: 
+Students Table
+Column | Description
+student_id (PK) | Unique student identifier
+first_name | Student first name
+last_name | Student last name
+email | Student email addressusername Login username
+password | Account password
+major | Student major
+class_year | Academic classification
+created_at | Record creation timestamp
+updated_at | Last modification timestamp
+Courses Table
+Column | Description
+course_id (PK) | Unique course identifier
+course_name | Course title
+department | Department offering the course
+credits | Credit hours
+capacity | Maximum number of students
+created_at | Creation timestamp
+updated_at | Update timestamp
+Instructors Table
+Column | Description
+instructor_id (PK) | Unique instructor identifier
+first_name | Instructor first name
+last_name | Instructor last name
+email | Instructor email
+department | Department affiliation
+office_location | Instructor office location
+created_at | Creation timestamp
+updated_at | Update timestamp
+Enrollments Table
+Column | Description
+enrollment_id (PK) | Unique enrollment record
+student_id (FK) | References Students.student_idcourse_id (FK) References Courses.course_id
+enrollment_date | Date student enrolled
+status | Enrollment status
+created_at | Creation timestamp
+updated_at | Update timestamp
+Grades Table
+Column | Description
+grade_id (PK) | Unique grade record
+student_id (FK) | References Students
+course_id (FK) | References Courses
+instructor_id (FK) | References Instructors
+grade | Assigned letter grade
+date_recorded | Date grade entered
+created_at | Creation timestamp
+updated_at | Update timestamp
+Entity Relationships
+• Students → Enrollments : One-to-Many (one student can enroll in many courses)
+• Courses → Enrollments : One-to-Many (one course can have many students)
+• Students ↔ Courses : Many-to-Many relationship resolved through the Enrollments table
+• Instructors → Courses : One-to-Many through InstructorAssignments
+• Students → Grades : One-to-Many
+• Courses → Grades : One-to-Many
+• Instructors → Grades : One-to-Many
