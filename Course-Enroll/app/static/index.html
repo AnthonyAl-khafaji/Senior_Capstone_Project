@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Course Enroll</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <header class="topbar">
+        <div class="brand">
+          <img src="/static/logo.webp" alt="College Logo" class="logo" />
+          <div>
+            <h1>CourseEnroll</h1>
+            <p>Enrollment and Academic Management</p>
+          </div>
+        </div>
+        <button id="logout-btn" class="ghost" style="display:none;">Logout</button>
+      </header>
+
+      <section id="auth-view" class="card auth-grid">
+        <div>
+          <h2>Login</h2>
+          <label>Email</label>
+          <input id="login-email" type="email" placeholder="name@school.edu" />
+          <label>Password</label>
+          <input id="login-password" type="password" placeholder="Password" />
+          <button id="login-btn">Login</button>
+        </div>
+
+        <div>
+          <h2>Sign Up</h2>
+          <label>Role</label>
+          <select id="signup-role">
+            <option value="student">Student</option>
+            <option value="instructor">Instructor</option>
+            <option value="admin">Admin</option>
+          </select>
+          <label>First Name</label>
+          <input id="signup-first" placeholder="First name" />
+          <label>Last Name</label>
+          <input id="signup-last" placeholder="Last name" />
+          <label>Email</label>
+          <input id="signup-email" type="email" placeholder="name@school.edu" />
+          <label>Password</label>
+          <input id="signup-password" type="password" placeholder="Password" />
+          <button id="signup-btn">Create Account</button>
+        </div>
+      </section>
+
+      <section id="dashboard-view" style="display:none;">
+        <div class="card">
+          <h2 id="welcome"></h2>
+          <p id="role-label" class="muted"></p>
+        </div>
+
+        <div id="student-dashboard" class="dashboard" style="display:none;">
+          <div class="card">
+            <h3>Course Catalog</h3>
+            <button id="refresh-catalog">Refresh Catalog</button>
+            <button id="toggle-unavailable-courses">View Unavailable Courses</button>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th><th>Name</th><th>Dept</th><th>Credits</th><th>Capacity</th><th>Instructor</th><th>Schedule</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="student-catalog-body"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>My Courses</h3>
+            <button id="refresh-my-courses">Refresh My Courses</button>
+            <ul id="student-my-courses"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Grades</h3>
+            <button id="refresh-grades">Refresh Grades</button>
+            <ul id="student-grades"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Schedule</h3>
+            <button id="refresh-schedule">Refresh Schedule</button>
+            <ul id="student-schedule"></ul>
+          </div>
+        </div>
+
+        <div id="instructor-dashboard" class="dashboard" style="display:none;">
+          <div class="card">
+            <h3>My Courses</h3>
+            <button id="refresh-instructor-courses">Refresh</button>
+            <ul id="instructor-courses"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Assigned Courses, Enrolled Students, and Grades</h3>
+            <button id="refresh-instructor-dashboard">Refresh</button>
+            <table>
+              <thead>
+                <tr>
+                  <th>Course ID</th>
+                  <th>Course Name</th>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Student Email</th>
+                  <th>Grade ID</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody id="instructor-assignment-body"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>Grade Management</h3>
+            <label>Student ID</label>
+            <input id="grade-student-id" type="number" />
+            <label>Course ID</label>
+            <input id="grade-course-id" type="number" />
+            <label>Grade</label>
+            <input id="grade-value" placeholder="A, B+, C" />
+            <button id="create-grade">Create Grade</button>
+            <button id="update-grade">Update Grade</button>
+            <label>Grade ID to Delete</label>
+            <input id="delete-grade-id" type="number" />
+            <button id="delete-grade">Delete Grade</button>
+          </div>
+        </div>
+
+        <div id="admin-dashboard" class="dashboard" style="display:none;">
+          <div class="card">
+            <h3>Course Management</h3>
+            <div class="grid-2">
+              <div>
+                <label>Course Name</label><input id="course-name" />
+                <label>Department</label><input id="course-department" />
+                <label>Credits</label><input id="course-credits" type="number" />
+                <label>Capacity</label><input id="course-capacity" type="number" />
+                <button id="create-course">Add Course</button>
+              </div>
+              <div>
+                <label>Course ID</label><input id="edit-course-id" type="number" />
+                <label>New Name</label><input id="edit-course-name" />
+                <label>New Department</label><input id="edit-course-department" />
+                <label>New Credits</label><input id="edit-course-credits" type="number" />
+                <label>New Capacity</label><input id="edit-course-capacity" type="number" />
+                <button id="update-course">Update Course</button>
+                <button id="delete-course">Delete Course</button>
+              </div>
+            </div>
+            <button id="refresh-admin-courses">Refresh Course Catalog</button>
+            <ul id="admin-courses"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Instructor Management</h3>
+            <label>Instructor ID</label><input id="ins-id" type="number" />
+            <label>Department</label><input id="ins-department" />
+            <label>Office Location</label><input id="ins-office" />
+            <button id="update-instructor-info">Update Instructor Info</button>
+            <label>Instructor ID to Delete</label><input id="delete-instructor-id" type="number" />
+            <button id="delete-instructor">Remove Instructor</button>
+            <button id="refresh-instructors">Refresh Instructors</button>
+            <ul id="admin-instructors"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Instructor Assignment</h3>
+            <label>Course ID</label><input id="assign-course-id" type="number" />
+            <label>Instructor ID</label><input id="assign-instructor-id" type="number" />
+            <div class="action-row">
+              <button id="assign-instructor">Assign Instructor</button>
+              <button id="update-instructor-assignment">Update Instructor Assignment</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Schedule Management</h3>
+            <label>Course ID</label><input id="schedule-course-id" type="number" />
+            <label>Days</label><input id="schedule-days" placeholder="Mon/Wed" />
+            <label>Time</label><input id="schedule-time" placeholder="10:00-11:15" />
+            <label>Classroom</label><input id="schedule-room" placeholder="Building A 101" />
+            <button id="save-schedule">Save Schedule</button>
+            <button id="update-schedule">Update Created Schedule</button>
+            <button id="delete-schedule">Delete Schedule</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="messages"></section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
